@@ -25,3 +25,17 @@ plot(proc,
      col="Red")
 
 dev.off()
+####################################################################################
+glm.model <- glm(Group ~ cg10364040+SCC, family = "binomial", data = data)
+prediction <- predict(glm.model, data, type="response")
+
+proc<-roc(data$Group,prediction,ci=T)
+
+pdf('HNSCC_cg10364040+SCC_ROC.pdf',width=8,height=8)
+plot(proc,
+     print.auc=TRUE,  #显示AUC
+     print.thres=TRUE,#显示最佳cutoff
+     main="ROC",
+     col="Red")
+
+dev.off()
