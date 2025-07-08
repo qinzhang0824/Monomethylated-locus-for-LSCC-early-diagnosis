@@ -22,7 +22,6 @@ champ.QC(beta=hnsc_beta,pheno=hnsc_info$Primary_Tumor_Site,Rplot=FALSE)
 
 myNorm <- champ.norm(beta=myLoad$beta,arraytype="450K",cores=5)
 QC.GUI(beta=myNorm,pheno=myLoad$pd$Primary_Tumor_Site,arraytype="450k")
-save(myNorm,file = 'hcc_training_champ.myNorm.Rdata')
 
 myCombat <- champ.runCombat(beta = myNorm,
                             pd = myLoad$pd,
@@ -234,9 +233,69 @@ randomForestcpg <- hnsc_RFBoot$all.data.vars
 hnsc_rf <- hnsc_RFBoot$all.data.randomForest
 table(hnsc_rf$predicted, hnsc_rf$y)
 
+load("tcga_tumor_paracancerous_Lasso_14marker_trainning.Rdata")
+load("tcga_tumor_paracancerous_RandomForest_15marker_trainning.Rdata")
 
+load("hnsc_352s_437s_filtered_imputed_Normed_overlap1139_clinical.Rdata")
+load("TCGA_GEO_176s_219s_Validation_overlap1139_Validation_beta_clinical.Rdata")
 
+lasso_13marker <- tplassocpg[-6]
+rf_14marker <- tprandomforestcpg[-8]
 
+lasso_train_matrix <- dat[,lasso_13marker]
+lasso_train_matrix <- t(lasso_train_matrix)
+colnames(lasso_train_matrix) <- dat$sampleID
+
+annotation_col <- data.frame(Sample=dat$Primary_Tumor_Site)
+rownames(annotation_col) <- colnames(lasso_train_matrix)
+
+ann_colors = list(Sample = c(Blood="green", Tumor="red"))
+pdf('lasso_13marker_Train_heatmap_plot.pdf',height=6,width=12)
+p <- pheatmap(lasso_train_matrix,show_colnames = F,annotation_col = annotation_col,border_color=NA,color = colorRampPalette(colors = c("blue","white","red"))(100),annotation_colors = ann_colors,cluster_cols = FALSE,main="Training(n=789)", fontsize_row = 12)
+p
+dev.off()
+
+lasso_val_matrix <- tbvaldat[,lasso_13marker]
+lasso_val_matrix <- t(lasso_val_matrix)
+colnames(lasso_val_matrix) <- tbvaldat$sampleID
+
+annotation_col <- data.frame(Sample=tbvaldat$Primary_Tumor_Site)
+rownames(annotation_col) <- colnames(lasso_val_matrix)
+
+ann_colors = list(Sample = c(Blood="green", Tumor="red"))
+pdf('lasso_13marker_Validation_heatmap_plot.pdf',height=6,width=12)
+p <- pheatmap(lasso_val_matrix,show_colnames = F,annotation_col = annotation_col,border_color=NA,color = colorRampPalette(colors = c("blue","white","red"))(100),annotation_colors = ann_colors,cluster_cols = FALSE,main="Validation(n=395)", fontsize_row = 12)
+p
+dev.off()
+
+#################################################
+rf_train_matrix <- dat[,rf_14marker]
+rf_train_matrix <- t(rf_train_matrix)
+colnames(rf_train_matrix) <- dat$sampleID
+
+annotation_col <- data.frame(Sample=dat$Primary_Tumor_Site)
+rownames(annotation_col) <- colnames(rf_train_matrix)
+
+ann_colors = list(Sample = c(Blood="green", Tumor="red"))
+pdf('rf_14marker_Train_heatmap_plot.pdf',height=6,width=12)
+p <- pheatmap(rf_train_matrix,show_colnames = F,annotation_col = annotation_col,border_color=NA,color = colorRampPalette(colors = c("blue","white","red"))(100),annotation_colors = ann_colors,cluster_cols = FALSE,main="Training(n=789)", fontsize_row = 12)
+p
+dev.off()
+
+rf_val_matrix <- tbvaldat[,rf_14marker]
+rf_val_matrix <- t(rf_val_matrix)
+colnames(rf_val_matrix) <- tbvaldat$sampleID
+
+annotation_col <- data.frame(Sample=tbvaldat$Primary_Tumor_Site)
+rownames(annotation_col) <- colnames(rf_val_matrix)
+
+ann_colors = list(Sample = c(Blood="green", Tumor="red"))
+pdf('rf_14marker_Validation_heatmap_plot.pdf',height=6,width=12)
+p <- pheatmap(rf_val_matrix,show_colnames = F,annotation_col = annotation_col,border_color=NA,color = colorRampPalette(colors = c("blue","white","red"))(100),annotation_colors = ann_colors,cluster_cols = FALSE,main="Validation(n=395)", fontsize_row = 12)
+p
+dev.off()
+
+#################################################
 
 
 
